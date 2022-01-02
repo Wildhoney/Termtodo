@@ -5,19 +5,31 @@ use std::io::Write;
 fn main() {
     let (event, value) = get_envs();
 
-    match event.as_str() {
-        "add" => match with_file().write_all(format!("{}\n", value).as_bytes()) {
+    match event {
+        Events::Add => match with_file().write_all(format!("{}\n", value).as_bytes()) {
             Err(_) => panic!("Failed to add todo."),
             Ok(_) => println!("Added todo."),
         },
-        "remove" => println!("Removed todo."),
-        _ => println!("Not sure really?"),
+        Events::Remove => println!("Removed todo."),
+        Events::Unknown => println!("Not sure really?"),
     }
 }
 
-fn get_envs() -> (String, String) {
+enum Events {
+    Add,
+    Remove,
+    Unknown,
+}
+
+fn get_envs() -> (Events, String) {
     let args: Vec<String> = env::args().collect();
-    let event = args[1].to_lowercase();
+
+    let event = match args[1].to_lowercase().as_str() {
+        "add" => Events::Add,
+        "remove" => Events::Remove,
+        _ => Events::Unknown,
+    };
+
     let value = if args.len() == 2 {
         String::from("")
     } else {
