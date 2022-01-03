@@ -1,83 +1,18 @@
-use std::env;
-use std::fs;
-use std::fs::OpenOptions;
-use std::io::Write;
-
-const FILENAME: &str = "todos.txt";
+mod todo;
 
 fn main() -> () {
-    let todo = get_todo();
+    let args = todo::parse_args();
 
-    match todo.kind {
-        Kind::Add => match write_todo(todo.value) {
+    match args.kind {
+        todo::Kind::Add => match todo::write(args.value) {
             true => println!("Added todo."),
             false => panic!("Failed to add todo."),
         },
-        Kind::Remove => println!("Removed todo."),
-        Kind::List => match read_todos() {
+        todo::Kind::Remove => println!("Removed todo."),
+        todo::Kind::List => match todo::read() {
             Some(todos) => println!("{}", todos),
             None => panic!("Failed to read todos."),
         },
-        Kind::Other => println!("Not sure really?"),
+        todo::Kind::Other => println!("Not sure really?"),
     }
-}
-
-#[derive(Debug, PartialEq)]
-enum Kind {
-    Add,
-    Remove,
-    List,
-    Other,
-}
-
-#[derive(Debug, PartialEq)]
-struct Todo {
-    kind: Kind,
-    value: String,
-}
-
-fn get_todo() -> Todo {
-    let args: Vec<String> = env::args().collect();
-
-    let kind = match args.get(1) {
-        Some(value) => match value.to_lowercase().as_str() {
-            "add" => Kind::Add,
-            "remove" => Kind::Remove,
-            "list" => Kind::List,
-            _ => Kind::Other,
-        },
-        None => Kind::Other,
-    };
-
-    let value = match args.get(2) {
-        Some(value) => format!("{}\n", value.to_string()),
-        None => String::from(""),
-    };
-
-    return Todo { kind, value };
-}
-
-fn read_todos() -> Option<String> {
-    match fs::read_to_string(FILENAME) {
-        Ok(content) => {
-            let handle = |(index, line)| format!("#{}: {}", index + 1, line);
-            let lines: Vec<String> = content.trim().lines().enumerate().map(handle).collect();
-            Some(String::from(lines.join("\n")))
-        }
-        Err(_) => None,
-    }
-}
-
-fn write_todo(value: String) -> bool {
-    let result = OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open(FILENAME)
-        .expect("Unable to open file")
-        .write_all(value.as_bytes());
-
-    return match result {
-        Ok(_) => true,
-        Err(_) => false,
-    };
 }
