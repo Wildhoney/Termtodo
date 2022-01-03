@@ -1,35 +1,36 @@
 use std::env;
+use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
+
+const FILENAME: &str = "todos.txt";
 
 fn main() -> () {
     let todo = get_todo();
 
-    match todo {
-        Todo {
-            kind: Kind::Add,
-            value,
-        } => match open_file().write_all(value.as_bytes()) {
-            Err(_) => panic!("Failed to add todo."),
-            Ok(_) => println!("Added todo."),
+    match todo.kind {
+        Kind::Add => match write_todo(todo.value) {
+            true => println!("Added todo."),
+            false => panic!("Failed to add todo."),
         },
-        Todo {
-            kind: Kind::Remove,
-            value: _,
-        } => println!("Removed todo."),
-        Todo {
-            kind: Kind::Other,
-            value: _,
-        } => println!("Not sure really?"),
+        Kind::Remove => println!("Removed todo."),
+        Kind::List => match read_todos() {
+            Some(todos) => println!("{}", todos),
+            None => panic!("Failed to read todos."),
+        },
+        Kind::Other => println!("Not sure really?"),
     }
 }
 
+#[derive(Debug, PartialEq)]
 enum Kind {
     Add,
     Remove,
+    List,
     Other,
 }
 
+#[derive(Debug, PartialEq)]
 struct Todo {
     kind: Kind,
     value: String,
@@ -42,6 +43,7 @@ fn get_todo() -> Todo {
         Some(value) => match value.to_lowercase().as_str() {
             "add" => Kind::Add,
             "remove" => Kind::Remove,
+            "list" => Kind::List,
             _ => Kind::Other,
         },
         None => Kind::Other,
@@ -55,10 +57,23 @@ fn get_todo() -> Todo {
     return Todo { kind, value };
 }
 
-fn open_file() -> std::fs::File {
-    return OpenOptions::new()
+fn read_todos() -> Option<String> {
+    match fs::read_to_string(FILENAME) {
+        Ok(content) => Some(String::from(content.trim())),
+        Err(_) => None,
+    }
+}
+
+fn write_todo(value: String) -> bool {
+    let result = OpenOptions::new()
         .append(true)
         .create(true)
-        .open("todos.txt")
-        .expect("Unable to open file");
+        .open(FILENAME)
+        .expect("Unable to open file")
+        .write_all(value.as_bytes());
+
+    return match result {
+        Ok(_) => true,
+        Err(_) => false,
+    };
 }
