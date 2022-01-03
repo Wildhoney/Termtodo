@@ -3,42 +3,56 @@ use std::fs::OpenOptions;
 use std::io::Write;
 
 fn main() -> () {
-    let (event, value) = get_args();
+    let todo = get_todo();
 
-    match event {
-        Events::Add => match open_file().write_all(format!("{}\n", value).as_bytes()) {
+    match todo {
+        Todo {
+            kind: Kind::Add,
+            value,
+        } => match open_file().write_all(value.as_bytes()) {
             Err(_) => panic!("Failed to add todo."),
             Ok(_) => println!("Added todo."),
         },
-        Events::Remove => println!("Removed todo."),
-        Events::Unknown => println!("Not sure really?"),
+        Todo {
+            kind: Kind::Remove,
+            value: _,
+        } => println!("Removed todo."),
+        Todo {
+            kind: Kind::Other,
+            value: _,
+        } => println!("Not sure really?"),
     }
 }
 
-enum Events {
+enum Kind {
     Add,
     Remove,
-    Unknown,
+    Other,
 }
 
-fn get_args() -> (Events, String) {
+struct Todo {
+    kind: Kind,
+    value: String,
+}
+
+fn get_todo() -> Todo {
     let args: Vec<String> = env::args().collect();
 
-    let event = match args.get(1) {
+    let kind = match args.get(1) {
         Some(value) => match value.to_lowercase().as_str() {
-            "add" => Events::Add,
-            "remove" => Events::Remove,
-            _ => Events::Unknown,
+            "add" => Kind::Add,
+            "remove" => Kind::Remove,
+            _ => Kind::Other,
         },
-        None => Events::Unknown,
+        None => Kind::Other,
     };
 
     let value = match args.get(2) {
-        Some(value) => value.to_string(),
+        Some(value) => format!("{}\n", value.to_string()),
         None => String::from(""),
     };
 
-    return (event, value);
+    return Todo { kind, value };
 }
 
 fn open_file() -> std::fs::File {
