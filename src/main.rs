@@ -59,7 +59,11 @@ fn get_todo() -> Todo {
 
 fn read_todos() -> Option<String> {
     match fs::read_to_string(FILENAME) {
-        Ok(content) => Some(String::from(content.trim())),
+        Ok(content) => {
+            let handle = |(index, line)| format!("#{}: {}", index + 1, line);
+            let lines: Vec<String> = content.trim().lines().enumerate().map(handle).collect();
+            Some(String::from(lines.join("\n")))
+        }
         Err(_) => None,
     }
 }
