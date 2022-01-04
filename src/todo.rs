@@ -10,36 +10,33 @@ pub enum Todo {
     Add(Option<String>),
     Remove(Option<i32>),
     List(Option<String>),
-    Other,
 }
 
 pub fn parse_args() -> Todo {
     let args: Vec<String> = env::args().collect();
+    let empty = String::from("");
+    let event = args.get(1).unwrap_or(&empty);
 
-    return match args.get(1) {
-        Some(value) => match value.to_lowercase().as_str() {
-            "add" => match args.get(2) {
-                Some(value) => {
-                    let value = String::from(format!("{}\n", value.to_string()));
+    return match event.as_str() {
+        "add" => match args.get(2) {
+            Some(value) => {
+                let value = String::from(format!("{}\n", value.to_string()));
 
-                    match write(&value) {
-                        true => Todo::Add(Some(value)),
-                        false => Todo::Add(None),
-                    }
+                match write(&value) {
+                    true => Todo::Add(Some(value)),
+                    false => Todo::Add(None),
                 }
-                None => Todo::Add(None),
-            },
-            "remove" | "rm" => match args.get(2) {
-                Some(value) => match value.parse::<i32>() {
-                    Ok(value) => Todo::Remove(Some(value)),
-                    Err(_) => Todo::Remove(None),
-                },
-                None => Todo::Remove(None),
-            },
-            "list" | "ls" => Todo::List(read()),
-            _ => Todo::Other,
+            }
+            None => Todo::Add(None),
         },
-        None => Todo::Other,
+        "remove" | "rm" => match args.get(2) {
+            Some(value) => match value.parse::<i32>() {
+                Ok(value) => Todo::Remove(Some(value)),
+                Err(_) => Todo::Remove(None),
+            },
+            None => Todo::Remove(None),
+        },
+        "list" | "ls" | _ => Todo::List(read()),
     };
 }
 
