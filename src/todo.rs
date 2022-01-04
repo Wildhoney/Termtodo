@@ -14,18 +14,14 @@ pub enum Todo {
 
 pub fn parse_args() -> Todo {
     let args: Vec<String> = env::args().collect();
-    let empty = String::from("");
+    let empty = String::new();
     let event = args.get(1).unwrap_or(&empty);
 
     return match event.as_str() {
         "add" => match args.get(2) {
             Some(value) => {
                 let value = String::from(format!("{}\n", value.to_string()));
-
-                match write(&value) {
-                    true => Todo::Add(Some(value)),
-                    false => Todo::Add(None),
-                }
+                Todo::Add(write(&value))
             }
             None => Todo::Add(None),
         },
@@ -51,7 +47,7 @@ fn read() -> Option<String> {
     }
 }
 
-fn write(value: &String) -> bool {
+fn write(value: &String) -> Option<String> {
     let result = OpenOptions::new()
         .append(true)
         .create(true)
@@ -60,7 +56,7 @@ fn write(value: &String) -> bool {
         .write_all(value.as_bytes());
 
     return match result {
-        Ok(_) => true,
-        Err(_) => false,
+        Ok(_) => Some(value.to_string()),
+        Err(_) => None,
     };
 }
