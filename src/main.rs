@@ -1,18 +1,16 @@
 mod todo;
 
 fn main() -> () {
-    let args = todo::parse_args();
+    match todo::parse_args() {
+        todo::Todo::Add(Some(_)) => println!("Added todo."),
+        todo::Todo::Add(None) => println!("Failed to add todo."),
 
-    match args.kind {
-        todo::Kind::Add => match todo::write(args.value) {
-            true => println!("Added todo."),
-            false => panic!("Failed to add todo."),
-        },
-        todo::Kind::Remove => println!("Removed todo."),
-        todo::Kind::List => match todo::read() {
-            Some(todos) => println!("{}", todos),
-            None => panic!("Failed to read todos."),
-        },
-        todo::Kind::Other => println!("Not sure really?"),
+        todo::Todo::Remove(Some(number)) => println!("Removed todo #{}.", number),
+        todo::Todo::Remove(None) => println!("Failed to remove todo."),
+
+        todo::Todo::List(Some(todos)) => println!("{}.", todos),
+        todo::Todo::List(None) => println!("Failed to list todos."),
+
+        todo::Todo::Other => println!("Not sure really?"),
     }
 }

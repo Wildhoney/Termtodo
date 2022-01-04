@@ -6,41 +6,44 @@ use std::io::Write;
 const FILENAME: &str = "todos.txt";
 
 #[derive(Debug, PartialEq)]
-pub enum Kind {
-    Add,
-    Remove,
-    List,
+pub enum Todo {
+    Add(Option<String>),
+    Remove(Option<i32>),
+    List(Option<String>),
     Other,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Todo {
-    pub kind: Kind,
-    pub value: String,
 }
 
 pub fn parse_args() -> Todo {
     let args: Vec<String> = env::args().collect();
 
-    let kind = match args.get(1) {
+    return match args.get(1) {
         Some(value) => match value.to_lowercase().as_str() {
-            "add" => Kind::Add,
-            "remove" => Kind::Remove,
-            "list" => Kind::List,
-            _ => Kind::Other,
+            "add" => match args.get(2) {
+                Some(value) => {
+                    let value = String::from(format!("{}\n", value.to_string()));
+
+                    match write(&value) {
+                        true => Todo::Add(Some(value)),
+                        false => Todo::Add(None),
+                    }
+                }
+                None => Todo::Add(None),
+            },
+            "remove" | "rm" => match args.get(2) {
+                Some(value) => match value.parse::<i32>() {
+                    Ok(value) => Todo::Remove(Some(value)),
+                    Err(_) => Todo::Remove(None),
+                },
+                None => Todo::Remove(None),
+            },
+            "list" | "ls" => Todo::List(read()),
+            _ => Todo::Other,
         },
-        None => Kind::Other,
+        None => Todo::Other,
     };
-
-    let value = match args.get(2) {
-        Some(value) => format!("{}\n", value.to_string()),
-        None => String::from(""),
-    };
-
-    return Todo { kind, value };
 }
 
-pub fn read() -> Option<String> {
+fn read() -> Option<String> {
     match fs::read_to_string(FILENAME) {
         Ok(content) => {
             let handle = |(index, line)| format!("#{}: {}", index + 1, line);
@@ -51,7 +54,7 @@ pub fn read() -> Option<String> {
     }
 }
 
-pub fn write(value: String) -> bool {
+fn write(value: &String) -> bool {
     let result = OpenOptions::new()
         .append(true)
         .create(true)
