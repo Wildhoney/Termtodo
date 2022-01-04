@@ -21,7 +21,7 @@ pub fn parse_args() -> Todo {
         "add" => match args.get(2) {
             Some(value) => {
                 let value = String::from(format!("{}\n", value.to_string()));
-                Todo::Add(write(&value))
+                Todo::Add(write(value))
             }
             None => Todo::Add(None),
         },
@@ -47,7 +47,7 @@ fn read() -> Option<String> {
     }
 }
 
-fn write(value: &String) -> Option<String> {
+fn write(value: String) -> Option<String> {
     let result = OpenOptions::new()
         .append(true)
         .create(true)
