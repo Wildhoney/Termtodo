@@ -2,35 +2,35 @@ use std::env;
 use std::fs::{self, File};
 use std::io::Write;
 
-const FILENAME: &str = "todos.txt";
+const FILENAME: &str = "Actions.txt";
 
 #[derive(Debug, PartialEq)]
-pub enum Todo {
+pub enum Action {
     Add(Option<String>),
     Remove(Option<usize>),
     List(Option<String>),
     Other,
 }
 
-pub fn parse_args() -> Todo {
+pub fn parse_args() -> Action {
     let args: Vec<String> = env::args().collect();
     let empty = String::new();
     let event = args.get(1).unwrap_or(&empty);
 
     return match event.as_str() {
         "add" => match args.get(2) {
-            Some(value) => Todo::Add(add(value.to_string())),
-            None => Todo::Add(None),
+            Some(value) => Action::Add(add(value.to_string())),
+            None => Action::Add(None),
         },
         "remove" | "rm" => match args.get(2) {
             Some(value) => match value.parse::<usize>() {
-                Ok(value) => Todo::Remove(delete(value)),
-                Err(_) => Todo::Remove(None),
+                Ok(value) => Action::Remove(delete(value)),
+                Err(_) => Action::Remove(None),
             },
-            None => Todo::Remove(None),
+            None => Action::Remove(None),
         },
-        "list" | "ls" | "" => Todo::List(read()),
-        _ => Todo::Other,
+        "list" | "ls" | "" => Action::List(read()),
+        _ => Action::Other,
     };
 }
 
