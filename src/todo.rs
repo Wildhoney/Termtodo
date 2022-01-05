@@ -10,6 +10,7 @@ pub enum Todo {
     Add(Option<String>),
     Remove(Option<i32>),
     List(Option<String>),
+    Other,
 }
 
 pub fn parse_args() -> Todo {
@@ -32,7 +33,8 @@ pub fn parse_args() -> Todo {
             },
             None => Todo::Remove(None),
         },
-        "list" | "ls" | _ => Todo::List(read()),
+        "list" | "ls" | "" => Todo::List(read()),
+        _ => Todo::Other,
     };
 }
 

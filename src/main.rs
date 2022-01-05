@@ -10,5 +10,7 @@ fn main() -> () {
 
         todo::Todo::List(Some(todos)) => println!("{}.", todos),
         todo::Todo::List(None) => println!("Failed to list todos."),
+
+        todo::Todo::Other => println!("Invalid command specified."),
     }
 }
