@@ -5,7 +5,7 @@ fn main() -> () {
         todo::Todo::Add(Some(_)) => println!("Added todo."),
         todo::Todo::Add(None) => println!("Failed to add todo."),
 
-        todo::Todo::Remove(Some(number)) => println!("Removed todo #{}.", number),
+        todo::Todo::Remove(Some(index)) => println!("Removed todo #{}.", index),
         todo::Todo::Remove(None) => println!("Failed to remove todo."),
 
         todo::Todo::List(Some(todos)) => println!("{}.", todos),
