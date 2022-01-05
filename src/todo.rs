@@ -2,7 +2,7 @@ use std::env;
 use std::fs::{self, File};
 use std::io::Write;
 
-const FILENAME: &str = "Actions.txt";
+const FILENAME: &str = "todos.txt";
 
 #[derive(Debug, PartialEq)]
 pub enum Action {
@@ -36,14 +36,12 @@ pub fn parse_args() -> Action {
 
 fn get_lines() -> Option<Vec<String>> {
     match fs::read_to_string(FILENAME) {
-        Ok(data) => {
-            let lines = data
-                .trim()
+        Ok(data) => Some(
+            data.trim()
                 .lines()
                 .map(String::from)
-                .collect::<Vec<String>>();
-            return Some(lines);
-        }
+                .collect::<Vec<String>>(),
+        ),
         Err(_) => None,
     }
 }
@@ -93,7 +91,7 @@ fn write(value: String) -> Option<String> {
     return match File::create(FILENAME) {
         Ok(mut file) => match file.write_all(value.as_bytes()) {
             Ok(_) => Some(value.to_string()),
-            Err(_) => None,
+            Err(_) => None
         },
         Err(_) => None,
     };
