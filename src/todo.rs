@@ -91,7 +91,7 @@ fn write(value: String) -> Option<String> {
     return match File::create(FILENAME) {
         Ok(mut file) => match file.write_all(value.as_bytes()) {
             Ok(_) => Some(value.to_string()),
-            Err(_) => None
+            Err(_) => None,
         },
         Err(_) => None,
     };
